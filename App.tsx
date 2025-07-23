@@ -1,12 +1,25 @@
+import React, { useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import LoadingScreen from './screens/LoadingScreen';
+import HomeScreen from './screens/HomeScreen';
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  const handleLoadingComplete = (): void => {
+    setIsLoading(false);
+  };
+
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={handleLoadingComplete} />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <>
+      <HomeScreen />
       <StatusBar style="auto" />
-    </View>
+    </>
   );
 }
 
@@ -16,5 +29,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1C1C1E',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  subText: {
+    fontSize: 16,
+    color: '#8E8E93',
+    textAlign: 'center',
   },
 });
