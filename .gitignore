@@ -35,3 +35,106 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# ================================
+# 추가 필요한 항목들
+# ================================
+
+# 환경 변수 (중요!)
+.env
+.env.development
+.env.production
+.env.test
+
+# Firebase 설정 (민감 정보)
+google-services.json
+GoogleService-Info.plist
+
+# Android 빌드
+android/app/build/
+android/build/
+android/local.properties
+android/app/release/
+android/gradlew
+android/gradlew.bat
+android/gradle/
+
+# iOS 빌드
+ios/build/
+ios/Pods/
+ios/*.xcworkspace
+ios/*.xcuserdata
+ios/DerivedData/
+*.xcuserstate
+ios/Podfile.lock
+
+# 로그 파일
+*.log
+logs/
+
+# 빌드 결과물
+build/
+*.app
+*.ipa
+*.apk
+*.aab
+
+# 캐시 파일
+.haste_cache
+.eslintcache
+.prettiercache
+
+# 개발 도구
+.flipper/
+.vscode/
+.buckconfig.local
+.bundle/
+
+# 테스트
+coverage/
+.nyc_output/
+
+# 임시 파일
+.tmp/
+.temp/
+*.tmp
+
+# 패키지 매니저
+.yarn-integrity
+.yarn/cache
+.yarn/unplugged
+.pnpm-debug.log*
+
+# OS 관련 (Windows/Linux)
+Thumbs.db
+Desktop.ini
+*~
+
+# Bundle artifacts
+*.jsbundle
+
+# Watchman
+.watchmanconfig
+
+# Fastlane (배포 도구)
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots
+fastlane/test_output
+
+# 키스토어 (추가 보안)
+*.keystore
+android/app/my-upload-key.keystore
+android/app/debug.keystore
+
+# Sentry
+.sentryclirc
+
+# Storybook (사용 시)
+storybook-static/
