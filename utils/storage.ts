@@ -5,12 +5,14 @@ const STORAGE_KEYS = {
   TODOS: '@todoapp_todos',
 } as const;
 
-// Todo 타입
+// 확장된 Todo 타입
 export interface Todo {
   id: string;
-  text: string;
+  title: string;
+  content?: string;
   completed: boolean;
   createdAt: Date;
+  dueDate: Date;
 }
 
 // 할일 목록 저장
@@ -38,6 +40,7 @@ export const loadTodos = async (): Promise<Todo[]> => {
     return parsed.map((todo: any) => ({
       ...todo,
       createdAt: new Date(todo.createdAt),
+      dueDate: new Date(todo.dueDate),
     }));
   } catch (error) {
     console.error('할일 불러오기 실패:', error);
@@ -46,27 +49,42 @@ export const loadTodos = async (): Promise<Todo[]> => {
   }
 };
 
-// 초기 데이터
-const getInitialTodos = (): Todo[] => [
-  {
-    id: '1',
-    text: '프로젝트 기획서 작성',
-    completed: false,
-    createdAt: new Date(),
-  },
-  {
-    id: '2',
-    text: '운동하기',
-    completed: true,
-    createdAt: new Date(),
-  },
-  {
-    id: '3',
-    text: '책 읽기',
-    completed: false,
-    createdAt: new Date(),
-  },
-];
+// 초기 데이터 (
+const getInitialTodos = (): Todo[] => {
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  return [
+    {
+      id: '1',
+      title: '프로젝트 기획서 작성',
+      content:
+        '새로운 모바일 앱 프로젝트의 기획서를 작성하고 팀원들과 공유하기',
+      completed: false,
+      createdAt: new Date(),
+      dueDate: today,
+    },
+    {
+      id: '2',
+      title: '운동하기',
+      content: '헬스장에서 30분 운동하기',
+      completed: true,
+      createdAt: new Date(),
+      dueDate: yesterday,
+    },
+    {
+      id: '3',
+      title: '책 읽기',
+      content: '리액트 네이티브 개발서 1장 읽기',
+      completed: false,
+      createdAt: new Date(),
+      dueDate: tomorrow,
+    },
+  ];
+};
 
 // 스토리지 초기화 (개발용)
 export const clearStorage = async (): Promise<void> => {
