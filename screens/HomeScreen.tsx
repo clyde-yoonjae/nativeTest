@@ -107,17 +107,6 @@ const HomeScreen: React.FC = () => {
     return formatDate(date);
   };
 
-  // 테스트용 강제 로딩 (나중에 제거 예정)
-  const [isTestLoading, setIsTestLoading] = useState(true);
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsTestLoading(false);
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const showLoading = isLoading || isTestLoading;
-
   return (
     <SafeAreaProvider>
       <SafeAreaView style={styles.container}>
@@ -149,7 +138,7 @@ const HomeScreen: React.FC = () => {
           {/* 진행 상황 카드 */}
           <View style={styles.card}>
             <Text style={styles.cardTitle}>진행 상황</Text>
-            {showLoading ? (
+            {isLoading ? (
               <LoadingCard
                 message="진행 상황을 불러오는 중..."
                 size="small"
@@ -177,7 +166,7 @@ const HomeScreen: React.FC = () => {
 
           {/* 새 할일 추가 버튼 */}
           <LoadingButton
-            isLoading={showLoading}
+            isLoading={isLoading}
             onPress={openModal}
             loadingText="로딩 중..."
             normalText="+ 새 할 일 추가"
@@ -186,11 +175,11 @@ const HomeScreen: React.FC = () => {
 
           {/* 할 일 목록 섹션 */}
           <Text style={styles.sectionTitle}>
-            할 일 목록 {showLoading ? '' : `(${currentTodos.length})`}
+            할 일 목록 {isLoading ? '' : `(${currentTodos.length})`}
           </Text>
 
           {/* 할 일 목록 */}
-          {showLoading ? (
+          {isLoading ? (
             <LoadingSection
               message="할일 목록을 불러오는 중..."
               backgroundColor={theme.colors.surface}
