@@ -60,28 +60,11 @@ const getInitialTodos = (): Todo[] => {
   return [
     {
       id: '1',
-      title: '프로젝트 기획서 작성',
-      content:
-        '새로운 모바일 앱 프로젝트의 기획서를 작성하고 팀원들과 공유하기',
+      title: '새로운 TODO를 추가하세요!',
+      content: '',
       completed: false,
       createdAt: new Date(),
       dueDate: today,
-    },
-    {
-      id: '2',
-      title: '운동하기',
-      content: '헬스장에서 30분 운동하기',
-      completed: true,
-      createdAt: new Date(),
-      dueDate: yesterday,
-    },
-    {
-      id: '3',
-      title: '책 읽기',
-      content: '리액트 네이티브 개발서 1장 읽기',
-      completed: false,
-      createdAt: new Date(),
-      dueDate: tomorrow,
     },
   ];
 };
