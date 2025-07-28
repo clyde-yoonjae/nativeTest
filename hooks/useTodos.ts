@@ -24,13 +24,22 @@ const persistTodos = async (todos: Todo[]): Promise<void> => {
   }
 };
 
+// 날짜 비교 헬퍼 함수
+const isSameDay = (date1: Date, date2: Date): boolean => {
+  return (
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
+  );
+};
+
 export const useTodos = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 앱 시작시 데이터 불러오기 (분리된 함수 사용)
+  // 앱 시작시 데이터 불러오기
   useEffect(() => {
-    let isMounted = true; // cleanup 방지
+    let isMounted = true;
 
     initializeTodos()
       .then((loadedTodos) => {
@@ -52,27 +61,29 @@ export const useTodos = () => {
     };
   }, []);
 
-  // todos가 변경될 때마다 저장 (debounce 효과)
+  // todos가 변경될 때마다 저장
   useEffect(() => {
     if (!isLoading && todos.length >= 0) {
       const timeoutId = setTimeout(() => {
         persistTodos(todos);
-      }, 300); // 300ms 후에 저장 (너무 자주 저장하지 않도록)
+      }, 300);
 
       return () => clearTimeout(timeoutId);
     }
   }, [todos, isLoading]);
 
-  // 할일 추가
-  const addTodo = useCallback((text: string): void => {
-    const trimmedText = text.trim();
-    if (!trimmedText) return;
+  // 할일 추가 (새로운 구조)
+  const addTodo = useCallback((title: string, content?: string, dueDate?: Date): void => {
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
 
     const newTodo: Todo = {
-      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`, // 더 안전한 ID 생성
-      text: trimmedText,
+      id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      title: trimmedTitle,
+      content: content?.trim() || '',
       completed: false,
       createdAt: new Date(),
+      dueDate: dueDate || new Date(), // 기본값은 오늘
     };
     setTodos((prevTodos) => [newTodo, ...prevTodos]);
   }, []);
@@ -91,15 +102,39 @@ export const useTodos = () => {
     setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
   }, []);
 
-  // 할일 수정
-  const updateTodo = useCallback((id: string, newText: string): void => {
-    const trimmedText = newText.trim();
-    if (!trimmedText) return;
-
+  // 할일 수정 (새로운 구조)
+  const updateTodo = useCallback((
+    id: string, 
+    title?: string, 
+    content?: string, 
+    dueDate?: Date
+  ): void => {
     setTodos((prevTodos) =>
-      prevTodos.map((todo) =>
-        todo.id === id ? { ...todo, text: trimmedText } : todo
-      )
+      prevTodos.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            ...(title !== undefined && { title: title.trim() }),
+            ...(content !== undefined && { content: content.trim() }),
+            ...(dueDate !== undefined && { dueDate }),
+          };
+        }
+        return todo;
+      })
+    );
+  }, []);
+
+  // 할일을 다음날로 이동
+  const moveTodoToNextDay = useCallback((id: string): void => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) => {
+        if (todo.id === id) {
+          const nextDay = new Date(todo.dueDate);
+          nextDay.setDate(nextDay.getDate() + 1);
+          return { ...todo, dueDate: nextDay };
+        }
+        return todo;
+      })
     );
   }, []);
 
@@ -108,13 +143,12 @@ export const useTodos = () => {
     setTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
   }, []);
 
-  // 통계 계산 (useMemo로 최적화)
+  // 전체 통계 계산
   const stats = useMemo(() => {
     const totalCount = todos.length;
     const completedCount = todos.filter((todo) => todo.completed).length;
     const pendingCount = totalCount - completedCount;
-    const completionRate =
-      totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+    const completionRate = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
     return {
       totalCount,
@@ -124,58 +158,45 @@ export const useTodos = () => {
     };
   }, [todos]);
 
-  // 오늘 할일만 필터링 (useMemo로 최적화)
-  const todayTodos = useMemo((): Todo[] => {
-    const today = new Date();
-    const todayStart = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate()
-    );
-    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
-
-    return todos.filter((todo) => {
-      const todoDate = new Date(todo.createdAt);
-      return todoDate >= todayStart && todoDate < todayEnd;
-    });
+  // 특정 날짜의 할일 가져오기 (메인 화면용)
+  const getTodosByDate = useCallback((date: Date): Todo[] => {
+    return todos.filter((todo) => isSameDay(todo.dueDate, date));
   }, [todos]);
 
-  // 이번 주 할일 필터링
-  const weekTodos = useMemo((): Todo[] => {
-    const today = new Date();
-    const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+  // 특정 날짜의 통계 계산
+  const getStatsByDate = useCallback((date: Date) => {
+    const dateTodos = getTodosByDate(date);
+    const totalCount = dateTodos.length;
+    const completedCount = dateTodos.filter((todo) => todo.completed).length;
+    const pendingCount = totalCount - completedCount;
+    const completionRate = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
-    return todos.filter((todo) => {
-      const todoDate = new Date(todo.createdAt);
-      return todoDate >= weekStart && todoDate <= today;
-    });
-  }, [todos]);
-
-  // 완료된 할일만 필터링
-  const completedTodos = useMemo((): Todo[] => {
-    return todos.filter((todo) => todo.completed);
-  }, [todos]);
-
-  // 미완료된 할일만 필터링
-  const pendingTodos = useMemo((): Todo[] => {
-    return todos.filter((todo) => !todo.completed);
-  }, [todos]);
+    return {
+      totalCount,
+      completedCount,
+      pendingCount,
+      completionRate,
+    };
+  }, [getTodosByDate]);
 
   return {
-    // 데이터
+    // 전체 데이터 (캘린더 화면용)
     todos,
-    todayTodos,
-    weekTodos,
-    completedTodos,
-    pendingTodos,
-    stats,
     isLoading,
+
+    // 전체 통계
+    stats,
+
+    // 메인 화면용 함수들
+    getTodosByDate,      // 특정 날짜의 할일 가져오기
+    getStatsByDate,      // 특정 날짜의 통계 계산
 
     // 액션들
     addTodo,
     toggleTodo,
     deleteTodo,
     updateTodo,
+    moveTodoToNextDay,
     clearCompletedTodos,
   };
 };
