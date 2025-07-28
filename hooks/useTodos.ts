@@ -33,7 +33,7 @@ export const useTodos = () => {
     let isMounted = true; // cleanup 방지
 
     initializeTodos()
-      .then(loadedTodos => {
+      .then((loadedTodos) => {
         if (isMounted) {
           setTodos(loadedTodos);
         }
@@ -74,13 +74,13 @@ export const useTodos = () => {
       completed: false,
       createdAt: new Date(),
     };
-    setTodos(prevTodos => [newTodo, ...prevTodos]);
+    setTodos((prevTodos) => [newTodo, ...prevTodos]);
   }, []);
 
   // 할일 완료 상태 토글
   const toggleTodo = useCallback((id: string): void => {
-    setTodos(prevTodos =>
-      prevTodos.map(todo =>
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
         todo.id === id ? { ...todo, completed: !todo.completed } : todo
       )
     );
@@ -88,7 +88,7 @@ export const useTodos = () => {
 
   // 할일 삭제
   const deleteTodo = useCallback((id: string): void => {
-    setTodos(prevTodos => prevTodos.filter(todo => todo.id !== id));
+    setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
   }, []);
 
   // 할일 수정
@@ -96,8 +96,8 @@ export const useTodos = () => {
     const trimmedText = newText.trim();
     if (!trimmedText) return;
 
-    setTodos(prevTodos =>
-      prevTodos.map(todo =>
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
         todo.id === id ? { ...todo, text: trimmedText } : todo
       )
     );
@@ -105,15 +105,16 @@ export const useTodos = () => {
 
   // 완료된 할일들 삭제
   const clearCompletedTodos = useCallback((): void => {
-    setTodos(prevTodos => prevTodos.filter(todo => !todo.completed));
+    setTodos((prevTodos) => prevTodos.filter((todo) => !todo.completed));
   }, []);
 
   // 통계 계산 (useMemo로 최적화)
   const stats = useMemo(() => {
     const totalCount = todos.length;
-    const completedCount = todos.filter(todo => todo.completed).length;
+    const completedCount = todos.filter((todo) => todo.completed).length;
     const pendingCount = totalCount - completedCount;
-    const completionRate = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+    const completionRate =
+      totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
     return {
       totalCount,
@@ -126,10 +127,14 @@ export const useTodos = () => {
   // 오늘 할일만 필터링 (useMemo로 최적화)
   const todayTodos = useMemo((): Todo[] => {
     const today = new Date();
-    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate()
+    );
     const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
 
-    return todos.filter(todo => {
+    return todos.filter((todo) => {
       const todoDate = new Date(todo.createdAt);
       return todoDate >= todayStart && todoDate < todayEnd;
     });
@@ -140,7 +145,7 @@ export const useTodos = () => {
     const today = new Date();
     const weekStart = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-    return todos.filter(todo => {
+    return todos.filter((todo) => {
       const todoDate = new Date(todo.createdAt);
       return todoDate >= weekStart && todoDate <= today;
     });
@@ -148,12 +153,12 @@ export const useTodos = () => {
 
   // 완료된 할일만 필터링
   const completedTodos = useMemo((): Todo[] => {
-    return todos.filter(todo => todo.completed);
+    return todos.filter((todo) => todo.completed);
   }, [todos]);
 
   // 미완료된 할일만 필터링
   const pendingTodos = useMemo((): Todo[] => {
-    return todos.filter(todo => !todo.completed);
+    return todos.filter((todo) => !todo.completed);
   }, [todos]);
 
   return {
@@ -165,7 +170,7 @@ export const useTodos = () => {
     pendingTodos,
     stats,
     isLoading,
-    
+
     // 액션들
     addTodo,
     toggleTodo,
