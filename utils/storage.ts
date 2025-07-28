@@ -32,7 +32,7 @@ export const loadTodos = async (): Promise<Todo[]> => {
       // 초기 데이터 반환
       return getInitialTodos();
     }
-    
+
     const parsed = JSON.parse(jsonValue);
     // Date 객체로 변환
     return parsed.map((todo: any) => ({
